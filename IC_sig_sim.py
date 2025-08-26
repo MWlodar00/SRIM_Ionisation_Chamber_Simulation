@@ -2,7 +2,7 @@
 """
 Michał Włodarczyk
 
-Script automating simulations of the signals for the IC with SRIM.
+Script automating simulations of the signals for the Ionisation Chamber with SRIM.
 
 """
 import matplotlib.pyplot as plt
@@ -221,6 +221,7 @@ def main():
                 name += ", " + str(i + settings.getint("beam", "beam_Z")) + elements[i + settings.getint(
                     "beam", "beam_Z")].symbol + str(j + settings.getint("beam", "beam_A"))
 
+    #display the results
     ax[0].set_title(name)
     plt.tight_layout()
 
