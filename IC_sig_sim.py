@@ -83,16 +83,18 @@ def define_target(settings):
                 "target", "layer_" + str(i) + "_element_" + str(j) + "_stoich")
 
         #check if the layer is gasous and define it appropriatelly
+        #pysrim does not currently (27.08.25) support the compound correction directly. To circumvent, the density is scaled by the factor obtained from the standalone SRIM application. This overestimats the correction since it is equivalent to lowering of both the electronic and the nuclear stopping powers (only the former should be affected). This will introduce a small error (a fraction of a percent), dependending on the importance of nuclear interactions (which, for a high energy beam should not be significant). The proper fix would require modifying the pysrim files (the layer and compound classes).
         if settings.getboolean("target", "layer_" + str(i) + "_gas"):
-            layers.append(Layer(elements_dict, density = gas_density_calc(settings.getfloat("target", "layer_" + str(i) + "_molar_mass"),
+            layers.append(Layer(elements_dict, density = gas_density_calc(settings.getfloat("target", "layer_" + str(i) + "_molar_mass") *
+                                                                          settings.getfloat("target", "layer_" + str(i) + "_compound_correction"),
                                                                           settings.getfloat("target", "layer_" + str(i) + "_pressure"),
                                                                           temp = settings.getfloat("target", "temperature")),
                                 width = settings.getfloat("target", "layer_" + str(i) + "_thickness")))
 
         else:
-            layers.append(Layer(elements_dict, density = settings.getfloat("target", "layer_" + str(i) + "_density"),
+            layers.append(Layer(elements_dict, density = settings.getfloat("target", "layer_" + str(i) + "_density") *
+                                settings.getfloat("target", "layer_" + str(i) + "_compound_correction"),
                                 width = settings.getfloat("target", "layer_" + str(i) + "_thickness")))
-
     return Target(layers) #define the target with the layers found
 
 def define_beam(settings, Z_offset, A_offset):
@@ -148,34 +150,38 @@ def plot_ionization(results, ax, settings, atomic_number, mass_number):
         intermediate_anode_energy = 0
 
         ion_results = results[results["Ion#"] == i + 1] # extract results for a particular ion
-        start_pos = settings.getfloat("simulation", "dist_to_window") + settings.getfloat("simulation", "dist_to_anode")  #the distance to the first anode in Angstrom
-        start_index = (ion_results["Depth"] - start_pos).abs().idxmin() #index in the ion_results subset corresponding to the first entry in the region of interest
-        #loop over the anodes
-        for j in range(13):
-            stop_pos = start_pos + (j + 1) * settings.getfloat("simulation", "anode_spacing")
-            stop_index = (ion_results["Depth"] - stop_pos).abs().idxmin() #index in the ion_results subset corresponding to the last entry in the region of interest
-            #update results
-            bins.append(j)
-            values.append((ion_results["Energy"][start_index] - ion_results["Energy"][stop_index]) / 10**3)
+        if len(ion_results) > 0 :
+            start_pos = settings.getfloat("simulation", "dist_to_window") + settings.getfloat("simulation", "dist_to_anode")  #the distance to the first anode in Angstrom
+            start_index = (ion_results["Depth"] - start_pos).abs().idxmin() #index in the ion_results subset corresponding to the first entry in the region of interest
+            #loop over the anodes
+            for j in range(13):
+                stop_pos = start_pos + (j + 1) * settings.getfloat("simulation", "anode_spacing")
+                stop_index = (ion_results["Depth"] - stop_pos).abs().idxmin() #index in the ion_results subset corresponding to the last entry in the region of interest
+                #update results
+                bins.append(j)
+                values.append((ion_results["Energy"][start_index] - ion_results["Energy"][stop_index]) / 10**3)
 
-            #get the E-dE values
-            if j == 0 :
-                first_anode_energy = ion_results["Energy"][start_index]
-            elif j == 13 :
-                last_anode_energy = ion_results["Energy"][stop_index]
-            elif j == settings.getfloat("simulation", "intermediate_anode_index") - 1 :
-                intermediate_anode_energy = ion_results["Energy"][start_index]
+                #get the E-dE values
+                if j == 0 :
+                    first_anode_energy = ion_results["Energy"][start_index]
+                elif j == 13 :
+                    last_anode_energy = ion_results["Energy"][stop_index]
+                elif j == settings.getfloat("simulation", "intermediate_anode_index") - 1 :
+                    intermediate_anode_energy = ion_results["Energy"][start_index]
 
-            start_index = stop_index #prepare for the next anode
+                start_index = stop_index #prepare for the next anode
 
         E_signals.append((first_anode_energy - last_anode_energy) / 10**3)
         dE_signals.append((intermediate_anode_energy - last_anode_energy) / 10**3)
 
     #plot the results
-    ax[0].hist2d(bins, values, range = [[0, 13], [0, 80]], bins = [13, 300],  cmap = "viridis", cmin = 1)
+    ax[0].hist2d(bins, values, range = [[0, 13], [settings.getfloat("plotting", "bragg_energy_min"), settings.getfloat("plotting", "bragg_energy_max")]],
+                 bins = [13, settings.getint("plotting", "bragg_energy_bins")],  cmap = "viridis", cmin = 1)
     ax[0].set_xlabel("Anode#")
     ax[0].set_ylabel("Energy (MeV)")
-    ax[1].hist2d(dE_signals, E_signals, range = [[0, 400], [0, 700]], bins = [700, 1000], cmap = "viridis", cmin = 1)
+    ax[1].hist2d(dE_signals, E_signals, range = [[settings.getfloat("plotting", "dE_min"), settings.getfloat("plotting", "dE_max")],
+                                                 [settings.getfloat("plotting", "E_min"), settings.getfloat("plotting", "E_max")]],
+                 bins = [settings.getint("plotting", "dE_bins"), settings.getint("plotting", "E_bins")], cmap = "viridis", cmin = 1)
     ax[1].set_xlabel("dE (MeV)")
     ax[1].set_ylabel("E (MeV)")
 
@@ -204,11 +210,11 @@ def main():
             beam = define_beam(settings, i, j) #setup the beam
             # Initialize a TRIM calculation
             trim = TRIM(target, beam, number_ions=settings.getint("simulation", "no_of_ions"), calculation=1, collisions = True)
-            srim_executable_directory = 'C:/SRIM_2013' # Specify the directory of SRIM.exe
+            srim_executable_directory = settings.get("simulation", "SRIM_directory") # Specify the directory of SRIM.exe
             trim.run(srim_executable_directory) #run the simulation
 
             # Load the results
-            results = pd.read_csv('C:/SRIM_2013/SRIM Outputs/COLLISON.txt' , sep=r"³",
+            results = pd.read_csv(settings.get("simulation", "SRIM_directory") + "/SRIM Outputs/COLLISON.txt" , sep=r"³",
                                  skiprows=72, header=None, encoding="latin1", on_bad_lines='skip',
                                  engine = 'python', skipinitialspace = True)
 

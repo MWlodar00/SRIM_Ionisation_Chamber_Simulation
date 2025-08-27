@@ -1,6 +1,18 @@
 ### Config fine specifying the settings for the SRIM simulation of the signals coming from the ISS ionisation chamber
 
+[plotting]
+bragg_energy_max = 80 #MeV
+bragg_energy_min = 0
+bragg_energy_bins = 300
+E_max = 700 #E axis on the E-dE hist
+E_min = 0
+E_bins = 1000
+dE_max = 400
+dE_min = 0
+dE_bins = 700
+
 [simulation]
+SRIM_directory = C:/SRIM_2013
 no_of_ions = 500 #number of ions to be used in the simulation
 dist_to_window = 8.6e8 #the distance between the vacuum window and the gas window 
 dist_to_anode = 2.8e8 #the distance between the gas window and the first anode
@@ -10,9 +22,9 @@ intermediate_anode_index = 8 #index where the energy collection for the dE signa
 [beam]
 energy = 7.5 #MeV/u
 beam_Z = 36
-beam_Z_range = 3 #the number atomic numbers to be simulated
+beam_Z_range = 3 #the number of atomic numbers to be simulated (only Zs higher than the original are considered)
 beam_A = 94
-beam_N_range = 3
+beam_N_range = 3 #as above
 
 [target] #adjust as needed
 temperature = 293 #affects the density of gasses
@@ -30,6 +42,7 @@ layer_0_element_2_stoich = 4
 layer_0_gas = false
 layer_0_density = 1.397
 layer_0_thickness = 9 #in Angstrom
+layer_0_compound_correction = 0.957
 
 #the MWPC chamber (1st part)
 layer_1_no_of_elements = 2
@@ -41,6 +54,7 @@ layer_1_gas = true
 layer_1_pressure = 5
 layer_1_molar_mass = 188
 layer_1_thickness = 4.5e8
+layer_1_compound_correction = 0.9565
 
 #cathode
 layer_2_no_of_elements = 3 
@@ -53,6 +67,7 @@ layer_2_element_2_stoich = 4
 layer_2_gas = false
 layer_2_density = 1.397
 layer_2_thickness = 9
+layer_2_compound_correction = 0.957
 
 #the MWPC chamber (2nd part)
 layer_3_no_of_elements = 2
@@ -64,6 +79,7 @@ layer_3_gas = true
 layer_3_pressure = 5
 layer_3_molar_mass = 188
 layer_3_thickness = 4.0e8
+layer_3_compound_correction = 0.9565
 
 #the gas window
 layer_4_no_of_elements = 3
@@ -76,6 +92,7 @@ layer_4_element_2_stoich = 4
 layer_4_gas = false
 layer_4_density = 1.397
 layer_4_thickness = 9
+layer_4_compound_correction = 0.957
 
 #the IC chamber
 layer_5_no_of_elements = 2
@@ -87,6 +104,7 @@ layer_5_gas = true
 layer_5_pressure = 100
 layer_5_molar_mass = 88
 layer_5_thickness = 54.5e8
+layer_5_compound_correction = 0.9586
 
 #ALTERNATIVE WITH THE TARGET 
 #no_of_target_layers = 7 #number of different layers of the target
@@ -94,12 +112,13 @@ layer_5_thickness = 54.5e8
 #actual target C2D4 (C2H8) with thickness 150 um/cm^2
 #layer_0_no_of_elements = 2
 #layer_0_element_0 = H
-#layer_0_element_0_stoich = 8 
+#layer_0_element_0_stoich = 2
 #layer_0_element_1 = C
-#layer_0_element_1_stoich = 2
+#layer_0_element_1_stoich = 1
 #layer_0_gas = false
 #layer_0_density = 0.9 #approximate
 #layer_0_thickness = 16600 #in Angstrom
+#layer_0_compound_correction = 0.9844
 
 #layer_1_no_of_elements = 3
 #layer_1_element_0 = H 
@@ -110,7 +129,8 @@ layer_5_thickness = 54.5e8
 #layer_1_element_2_stoich = 4
 #layer_1_gas = false
 #layer_1_density = 1.397
-#layer_1_thickness =  4.5e8 #in Angstrom
+#layer_1_thickness =  4.5e8
+#layer_1_compound_correction = 0.957
 
 #the MWPC chamber (1st part)
 #layer_2_no_of_elements = 2
@@ -122,6 +142,7 @@ layer_5_thickness = 54.5e8
 #layer_2_pressure = 5
 #layer_2_molar_mass = 188
 #layer_2_thickness = 4.5e8
+#layer_2_compound_correction = 0.9565
 
 #cathode
 #layer_3_no_of_elements = 3 
@@ -134,6 +155,7 @@ layer_5_thickness = 54.5e8
 #layer_3_gas = false
 #layer_3_density = 1.397
 #layer_3_thickness = 9
+#layer_3_compound_correction = 0.957
 
 #the MWPC chamber (2nd part)
 #layer_4_no_of_elements = 2
@@ -145,6 +167,7 @@ layer_5_thickness = 54.5e8
 #layer_4_pressure = 5
 #layer_4_molar_mass = 188
 #layer_4_thickness = 4.0e8
+#layer_4_compound_correction = 0.9565
 
 #the gas window
 #layer_5_no_of_elements = 3
@@ -157,6 +180,7 @@ layer_5_thickness = 54.5e8
 #layer_5_gas = false
 #layer_5_density = 1.397
 #layer_5_thickness = 9
+#layer_5_compound_correction = 0.957
 
 #the IC chamber
 #layer_6_no_of_elements = 2
@@ -168,3 +192,4 @@ layer_5_thickness = 54.5e8
 #layer_6_pressure = 100
 #layer_6_molar_mass = 88
 #layer_6_thickness = 54.5e8
+#layer_0_compound_correction = 0.9586
