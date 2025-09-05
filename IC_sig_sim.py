@@ -66,7 +66,7 @@ def define_target(settings):
     Creates an abject storing the properties of the Ionisation Chamber
     as defined in the settings file
 
-    Parameters
+    Parameters SB 15 09
     ----------
     settings : configparser
     Returns
@@ -79,8 +79,12 @@ def define_target(settings):
 
         #define the composition of a layer
         for j in range(settings.getint("target", "layer_" + str(i) + "_no_of_elements")):
-            elements_dict[settings.get("target", "layer_" + str(i) + "_element_" + str(j))] =settings.getint(
-                "target", "layer_" + str(i) + "_element_" + str(j) + "_stoich")
+            element = settings.get("target", "layer_" + str(i) + "_element_" + str(j))
+            element_dict = {"stoich" : settings.getint("target", "layer_" + str(i) + "_element_" + str(j) + "_stoich"),
+                            "E_d" : settings.getfloat("target", element + "_displacement_energy"), # these values specify the energy losses characteristic for each element. They were obtained from the standalone SRIM (this version uses defaults that produce incorrect results)
+                            "lattice" : settings.getfloat("target", element + "_lattice"),
+                            "surface" : settings.getfloat("target", element + "_surface_energy")}
+            elements_dict[element] = element_dict
 
         #check if the layer is gasous and define it appropriatelly
         #pysrim does not currently (27.08.25) support the compound correction directly. To circumvent, the density is scaled by the factor obtained from the standalone SRIM application. This overestimats the correction since it is equivalent to lowering of both the electronic and the nuclear stopping powers (only the former should be affected). This will introduce a small error (a fraction of a percent), dependending on the importance of nuclear interactions (which, for a high energy beam should not be significant). The proper fix would require modifying the pysrim files (the layer and compound classes).
@@ -97,7 +101,7 @@ def define_target(settings):
                                 width = settings.getfloat("target", "layer_" + str(i) + "_thickness")))
     return Target(layers) #define the target with the layers found
 
-def define_beam(settings, Z_offset, A_offset):
+def define_beam(settings, iterator):
     """
     Creates an abject storing the properties of the target as defined in the settings file
 
@@ -113,8 +117,8 @@ def define_beam(settings, Z_offset, A_offset):
     ion : srim.ion
 
     """
-    Z = settings.getint("beam", "beam_Z") + Z_offset
-    A = settings.getint("beam", "beam_A") + A_offset
+    Z = settings.getint("beam", "beam_Z_" + str(iterator + 1))
+    A = settings.getint("beam", "beam_A_" + str(iterator + 1))
     return Ion(elements[Z].symbol, energy = A * settings.getfloat("beam", "energy") * 10**6,
                mass = (A * atomic_mass_unit + mass.massExcess(Z, A)[0]) / atomic_mass_unit)
 
@@ -201,31 +205,31 @@ def main():
     fig, ax = plt.subplots(2,1, figsize = (6, 10))
 
     #prepare the name of the plot
-    name = str(settings.getint("beam", "beam_Z")) + str(elements[settings.getint("beam", "beam_Z")].symbol) + str(
-        settings.getint("beam", "beam_A"))
+    name = str(settings.getint("beam", "beam_Z_1")) + str(elements[settings.getint("beam", "beam_Z_1")].symbol) + str(
+        settings.getint("beam", "beam_A_1"))
 
     #loop across all of the relevant beams
-    for i in range(settings.getint("beam", "beam_Z_range")):
-        for j in range(settings.getint("beam", "beam_N_range")):
-            beam = define_beam(settings, i, j) #setup the beam
+    for i in range(settings.getint("beam", "beam_components")):
+        if (settings.getboolean("simulation", "On")) :
+            beam = define_beam(settings, i) #setup the beam
             # Initialize a TRIM calculation
             trim = TRIM(target, beam, number_ions=settings.getint("simulation", "no_of_ions"), calculation=1, collisions = True)
             srim_executable_directory = settings.get("simulation", "SRIM_directory") # Specify the directory of SRIM.exe
             trim.run(srim_executable_directory) #run the simulation
 
-            # Load the results
-            results = pd.read_csv(settings.get("simulation", "SRIM_directory") + "/SRIM Outputs/COLLISON.txt" , sep=r"³",
-                                 skiprows=72, header=None, encoding="latin1", on_bad_lines='skip',
-                                 engine = 'python', skipinitialspace = True)
+        # Load the results
+        results = pd.read_csv(settings.get("simulation", "SRIM_directory") + "/SRIM Outputs/COLLISON.txt" , sep=r"³",
+                             skiprows=72, header=None, encoding="latin1", on_bad_lines='skip',
+                             engine = 'python', skipinitialspace = True)
 
-            results = results.drop(results.columns[[0, 4, 5, 6, 7, 8, 9, 10, 11, 12]], axis=1) #drop useless columns
-            results.columns = ["Ion#", "Energy", "Depth"] # Give meaningful column names
-            #plot the results
-            plot_ionization(results, ax, settings, i + settings.getint("beam", "beam_Z"), j + settings.getint("beam", "beam_A"))
-            #update the name if needed
-            if (i != 0 or j != 0) :
-                name += ", " + str(i + settings.getint("beam", "beam_Z")) + elements[i + settings.getint(
-                    "beam", "beam_Z")].symbol + str(j + settings.getint("beam", "beam_A"))
+        results = results.drop(results.columns[[0, 4, 5, 6, 7, 8, 9, 10, 11, 12]], axis=1) #drop useless columns
+        results.columns = ["Ion#", "Energy", "Depth"] # Give meaningful column names
+        #plot the results
+        plot_ionization(results, ax, settings, settings.getint("beam", "beam_Z_" + str(i + 1)), settings.getint("beam", "beam_A_" + str(i + 1)))
+        #update the name if needed
+        if (i != 0) :
+            name += ", " + str(settings.getint("beam", "beam_Z_" + str(i + 1))) + elements[settings.getint(
+                "beam", "beam_Z_"+ str(i + 1))].symbol + str(settings.getint("beam", "beam_A_" + str(i + 1)))
 
     #display the results
     ax[0].set_title(name)

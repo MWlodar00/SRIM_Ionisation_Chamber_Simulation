@@ -1,33 +1,51 @@
 ### Config fine specifying the settings for the SRIM simulation of the signals coming from the ISS ionisation chamber
 
 [plotting]
-bragg_energy_max = 80 #MeV
+bragg_energy_max = 100 #MeV
 bragg_energy_min = 0
 bragg_energy_bins = 300
-E_max = 700 #E axis on the E-dE hist
-E_min = 0
-E_bins = 1000
+E_max = 800 #E axis on the E-dE hist
+E_min = 650
+E_bins = 500
 dE_max = 400
 dE_min = 0
 dE_bins = 700
 
 [simulation]
+On = True
 SRIM_directory = C:/SRIM_2013
 no_of_ions = 500 #number of ions to be used in the simulation
-dist_to_window = 8.6e8 #the distance between the vacuum window and the gas window 
+dist_to_window = 8.65e8 #the distance between the vacuum window and the gas window 
 dist_to_anode = 2.8e8 #the distance between the gas window and the first anode
 anode_spacing = 4.0e8 #the distance between the collecting plates
 intermediate_anode_index = 8 #index where the energy collection for the dE signal starts
 
 [beam]
 energy = 7.5 #MeV/u
-beam_Z = 36
-beam_Z_range = 3 #the number of atomic numbers to be simulated (only Zs higher than the original are considered)
-beam_A = 94
-beam_N_range = 3 #as above
+beam_components = 2
+beam_Z_1 = 50
+beam_A_1 = 108
+beam_Z_2 = 49
+beam_A_2 = 108
 
 [target] #adjust as needed
 temperature = 293 #affects the density of gasses
+
+h_displacement_energy = 10
+h_lattice = 3
+h_surface_energy = 2
+
+f_displacement_energy = 25
+f_lattice = 3
+f_surface_energy = 2
+
+c_displacement_energy = 28
+c_lattice = 3
+c_surface_energy = 7.41
+
+o_displacement_energy = 28
+o_lattice = 3
+o_surface_energy = 2
 
 no_of_target_layers = 6 #number of different layers of the target
 
@@ -101,7 +119,7 @@ layer_5_element_0_stoich = 1
 layer_5_element_1 = F
 layer_5_element_1_stoich = 4
 layer_5_gas = true
-layer_5_pressure = 100
+layer_5_pressure = 85
 layer_5_molar_mass = 88
 layer_5_thickness = 54.5e8
 layer_5_compound_correction = 0.9586
