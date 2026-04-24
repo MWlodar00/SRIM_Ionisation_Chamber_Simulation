@@ -19,5 +19,6 @@ The code serves two main purposes:
 It can also be used for calibration, but it shouldn't be necessary.
 
 For completeness, the resolution estimation is done in two regimes. In the bulk of the data, an empirical formula is used to take the average energy deposition across the first few segments and predict the spectrum's standard deviation. This captures the dependence on the atomic number quite neatly. In the last two segments (in which the energy was deposited), another curve is used. This way, one can capture the energy straggling effects more accurately, but with the limited statistics, this formula isn't very accurate. Here's the data from which the fits were extracted.
-<img width="971" height="949" alt="image" src="https://github.com/user-attachments/assets/8c33819f-bce4-44c7-ab73-c2b923da7baf" />   <img width="800" height="800" alt="last_segment_resolution" src="https://github.com/user-attachments/assets/51354311-10bb-4540-9948-ed4316347751" />
+<img width="1851" height="980" alt="image" src="https://github.com/user-attachments/assets/c73df8a6-4d3a-4ae1-b729-be093b31d889" />
+
 
