@@ -15,3 +15,9 @@ The code serves two main purposes:
 
 2. A rough check of whether a particular beam mixture is resolvable. Using the past data on the resolution (obtained with an imperfect setup, so not of optimal quality), the code looks for a segment with the highest chances of resolving the beam components and plots what the final spectrum may look like. The resolution is quite hard to predict since simulating the energy straggling is very challenging, and the segment-to-segment variability in terms of electronics is non-negligible. Here's a comparison between simulated and recorded spectra for Sn108 (again). The resolution estimation worked quite well, but the spacing between the peaks is narrower than measured by about 1 MeV, hence the difference.
 <img width="1853" height="568" alt="image" src="https://github.com/user-attachments/assets/8d52c856-898d-4210-af9c-57c9a7bab2d7" />
+
+It can also be used for calibration, but it shouldn't be necessary.
+
+For completeness, the resolution estimation is done in two regimes. In the bulk of the data, an empirical formula is used to take the average energy deposition across the first few segments and predict the spectrum's standard deviation. This captures the dependence on the atomic number quite neatly. In the last two segments (in which the energy was deposited), another curve is used. This way, one can capture the energy straggling effects more accurately, but with the limited statistics, this formula isn't very accurate. Here's the data from which the fits were extracted.
+<img width="971" height="949" alt="image" src="https://github.com/user-attachments/assets/8c33819f-bce4-44c7-ab73-c2b923da7baf" />   <img width="800" height="800" alt="last_segment_resolution" src="https://github.com/user-attachments/assets/51354311-10bb-4540-9948-ed4316347751" />
+
