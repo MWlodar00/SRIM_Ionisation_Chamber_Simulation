@@ -18,10 +18,10 @@ E_stop = 7
 
 [simulation]
 On = True #setting it to false allows to restore the results of the last simulation without the need to rerun SRIM. Only works for a single-component beam and with no error analysis/uncertainty estimation
-error_analysis = False #using with multiple targets not recommended
+error_analysis = True #using with multiple targets not recommended
 simulation_uncertainty = 1.04 #error on the simulation (4% according to the SRIM website, affects the density of all the materials)
 SRIM_directory = C:/SRIM_2013 #change as needed
-no_of_ions = 100 #number of ions to be used in the simulation
+no_of_ions = 35 #number of ions to be used in the simulation
 dist_to_window = 8.5e8 #the distance between the vacuum window and the gas window 
 dist_to_anode = 3.4e8 #the distance between the gas window and the first anode
 anode_spacing = 4.0e8 #the distance between the collecting plates
@@ -30,7 +30,7 @@ target_in = false
 signal_threshold = 5500 #the minimum energy deposited within a segment that can generate a signal
 
 [beam]
-energy = 8.07 #MeV/u
+energy = 8.06 #MeVu
 beam_components = 2
 beam_Z_1 = 50
 beam_A_1 = 108

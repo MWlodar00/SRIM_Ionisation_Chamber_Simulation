@@ -271,10 +271,6 @@ def error_analysis(results, settings):
     # Find the average and std for each segment
     centroids = []
     for i in range(len(values_binned)):
-        #if np.average(values_binned[i]) < settings.getfloat("simulation", "signal_threshold"): #check if there is a signal is likely to be picked up by the detector (signal threshold)
-        #    centroids.append(0)
-        #    centroids.append(0)
-        #else:
         centroids.append(np.average(values_binned[i]))
         centroids.append(np.std(values_binned[i]))
 
@@ -324,6 +320,8 @@ def compute_overlap(beams_centroids, pair_to_check, ax, settings):
     ----------
     beams_centroids : [float]
         The centroids and the stds for each segment of each beams 
+    pair_to_check : [int]
+        the indices of the beams to be compared 
     fraction_1, fraction_2 : float 
         The fraction of the beam corresponding to each of the two components
     ax : axes to plot on (for visualisation purposes)
@@ -344,19 +342,19 @@ def compute_overlap(beams_centroids, pair_to_check, ax, settings):
         if i >= range_idx_1 - 1: # if the segment with maximum separation is comes from either of the last two segments the resolution should be estimated using the formula accounting for energy straggling
             mean_energy_1 = np.average(beams_centroids[2 * pair_to_check[0]][2:-1:2][range_idx_1 - 1 : range_idx_1 + 1])
             resolutions_1 = np.insert(resolutions_1, len(resolutions_1), get_energy_resolution_at_last_segment(mean_energy_1))
-            print(beams_centroids[2 * pair_to_check[0]][2:-1:2][i], resolutions_1[-1])
+            #print(beams_centroids[2 * pair_to_check[0]][2:-1:2][i], resolutions_1[-1])
         else:
             mean_energy_1 = np.average(beams_centroids[2 * pair_to_check[0]][2:-4:2])
             resolutions_1 = np.insert(resolutions_1, len(resolutions_1), get_energy_resolution(mean_energy_1))
-            print(beams_centroids[2 * pair_to_check[0]][2:-1:2][i], resolutions_1[-1])
+            #print(beams_centroids[2 * pair_to_check[0]][2:-1:2][i], resolutions_1[-1])
         if i >= range_idx_2 - 1:
             mean_energy_2 = np.average(beams_centroids[2 * pair_to_check[1]][2:-1:2][range_idx_2 - 1 : range_idx_2 + 1])
             resolutions_2 = np.insert(resolutions_2, len(resolutions_2), get_energy_resolution_at_last_segment(mean_energy_2))
-            print(beams_centroids[2 * pair_to_check[1]][2:-1:2][i], resolutions_2[-1])
+            #print(beams_centroids[2 * pair_to_check[1]][2:-1:2][i], resolutions_2[-1])
         else:
             mean_energy_2 = np.average(beams_centroids[2 * pair_to_check[1]][2:-4:2])
             resolutions_2 = np.insert(resolutions_2, len(resolutions_2), get_energy_resolution(mean_energy_2))
-            print(beams_centroids[2 * pair_to_check[1]][2:-1:2][i], resolutions_2[-1])
+            #print(beams_centroids[2 * pair_to_check[1]][2:-1:2][i], resolutions_2[-1])
         
     #figure out the how well separated the beams are given their predicted resolution
     max_separation_idx = np.argmax(absolute_separation / (np.array(resolutions_1) + np.array(resolutions_2) ))
@@ -375,6 +373,7 @@ def compute_overlap(beams_centroids, pair_to_check, ax, settings):
     def gaussian_min(x):
         return np.minimum(gaussian(x, energy_1, resolutions_1[max_separation_idx], 1), gaussian(x, energy_2, resolutions_2[max_separation_idx], fraction_2 / (fraction_1 + fraction_2) ))
     
+    #calculate the overlap betwene the spectra
     result, err = quad(gaussian_min, min(energy_1 - 5 * resolutions_1[max_separation_idx], energy_2 - 5 * resolutions_2[max_separation_idx]),
                        max(energy_1 + 5 * resolutions_1[max_separation_idx], energy_2 + 5 * resolutions_2[max_separation_idx]))
     
@@ -384,6 +383,7 @@ def compute_overlap(beams_centroids, pair_to_check, ax, settings):
               "keV, respectively, the overlap between their spectra is estimated to be", "{:.2f}".format(result * 100), "%." )
     
     
+    #prepare for plotting the spectra
     x = np.linspace(min(energy_1 - 5 * resolutions_1[max_separation_idx], energy_2 - 5 * resolutions_2[max_separation_idx]),
                     max(energy_1 + 5 * resolutions_1[max_separation_idx], energy_2 + 5 * resolutions_2[max_separation_idx]), 1000)
     
@@ -485,7 +485,7 @@ def main():
                 linestyle = '-', linewidth = 1, color = ['0','g','r','v'][i % 4])
             #labelling of the graph
             ax_3.set_xlabel("Segment index")
-            ax_3.set_ylabel("Energy deposited per segment (KeV)")
+            ax_3.set_ylabel("Energy deposited per segment (MeV)")
             ax_3.set_title("The uncertainty intervals for energy deposited in each segment of the IC")
             ax_3.legend()
 
