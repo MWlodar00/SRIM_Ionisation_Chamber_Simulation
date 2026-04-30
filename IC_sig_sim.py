@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Michał Włodarczyk
+Michał Włodarczyk, 30/04/2026
 
 Script automating simulations of the signals for the Ionisation Chamber with SRIM.
 Includes methods for error estimation and tools to predict if particular beam
@@ -298,7 +298,7 @@ def get_energy_resolution_at_last_segment(energy):
     a given average energy measured at the last two semgent using an empirical data obtained during the 2025 experimental campaign
     The error on the fit is considerable (uncertainty of the order of 8% should be expected).
     May slighty overestimate the std for an optimal situation (some mistakes during setup of the detector were made)
-    Formula tested only until about 50MeV blah blah blah
+    Formula tested only until about 50MeV
 
     Parameters
     ----------
