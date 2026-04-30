@@ -298,7 +298,7 @@ def get_energy_resolution_at_last_segment(energy):
     a given average energy measured at the last two semgent using an empirical data obtained during the 2025 experimental campaign
     The error on the fit is considerable (uncertainty of the order of 8% should be expected).
     May slighty overestimate the std for an optimal situation (some mistakes during setup of the detector were made)
-    Formula tested only until about 50MeV
+    Formula tested only until about 50MeV blah blah blah
 
     Parameters
     ----------
